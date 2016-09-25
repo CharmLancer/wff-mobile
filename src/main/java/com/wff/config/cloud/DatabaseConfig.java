@@ -1,31 +1,27 @@
-package test.config;
+package com.wff.config.cloud;
 
+import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
-@PropertySource("classpath:config/application.properties")
+@Profile("cloud")
 public class DatabaseConfig {
-	@Autowired
-	Environment env;
+	// @Autowired
+	// Environment env;
 
 	@Bean
 	public BasicDataSource basicDataSource() throws URISyntaxException {
-		String username = env.getProperty("DATABASE_USER_LOCAL");// dbUri.getUserInfo().split(":")[0];
-		String password = env.getProperty("DATABASE_PASSWORD_LOCAL");// dbUri.getUserInfo().split(":")[1];
-		String dbUrl = env.getProperty("DATABASE_URL_LOCAL");// "jdbc:postgresql://"
-																// +
-																// dbUri.getHost()
-																// + ':' +
-																// dbUri.getPort()
-																// +
-																// dbUri.getPath();
+
+		URI dbUri = new URI(System.getenv("DATABASE_URL"));
+
+		String username = dbUri.getUserInfo().split(":")[0];
+		String password = dbUri.getUserInfo().split(":")[1];
+		String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
 
 		BasicDataSource basicDataSource = new BasicDataSource();
 		basicDataSource.setUrl(dbUrl);
@@ -34,9 +30,11 @@ public class DatabaseConfig {
 
 		return basicDataSource;
 	}
+	//
 
 	// @Bean
-	// public DataSource dataSource() throws URISyntaxException {
+	// public BasicDataSource dataSource() throws URISyntaxException,
+	// ConfigurationException {
 	// // URI dbUri = new URI(System.getenv("DATABASE_URL"));
 	// // URI dbUri = new URI("jdbc:postgresql://localhost:5432/iwrm");
 	// // URI dbUri= new URI(env.getProperty("DATABASE_URL"));
@@ -46,13 +44,22 @@ public class DatabaseConfig {
 	// // String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':'
 	// // + dbUri.getPort() + dbUri.getPath();
 	//
-	// DataSource basicDataSource = new DriverManagerDataSource(
-	// env.getProperty("DATABASE_URL_LOCAL"),
-	// env.getProperty("DATABASE_USER_LOCAL"),
-	// env.getProperty("DATABASE_PASSWORD_LOCAL"));
+	// try {
+	// Class.forName("org.postgresql.Driver");
+	// BasicDataSource basicDataSource = new BasicDataSource();
+	// basicDataSource.setUrl(env.getProperty("DATABASE_URL_LOCAL"));
+	// basicDataSource.setUsername(env.getProperty("DATABASE_USER_LOCAL"));
+	// basicDataSource.setPassword(env.getProperty("DATABASE_PASSWORD_LOCAL"));
+	// // new//
+	// //
+	// DriverManagerDataSource(env.getProperty("DATABASE_URL_LOCAL"),env.getProperty("DATABASE_USER_LOCAL"),
+	// // env.getProperty("DATABASE_PASSWORD_LOCAL"));
 	// // basicDataSource.setUrl();
 	// // basicDataSource.setUsername();
 	// // basicDataSource.setPassword();
 	// return basicDataSource;
+	// } catch (ClassNotFoundException e) {
+	// throw new ConfigurationException();
+	// }
 	// }
 }
